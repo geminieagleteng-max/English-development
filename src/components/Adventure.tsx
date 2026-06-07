@@ -180,8 +180,10 @@ export const Adventure: React.FC<AdventureProps> = ({
       setCorrectCount((c) => c + 1);
       setCorrectStreak((s) => s + 1);
       
-      const sessionCoins = 10;
-      const sessionExp = 15;
+      // Calculate session rewards with Home Level bonuses
+      const sessionCoins = stats.homeLevel && stats.homeLevel >= 2 ? Math.round(10 * 1.1) : 10;
+      const sessionExp = stats.homeLevel && stats.homeLevel >= 3 ? Math.round(15 * 1.15) : 15;
+      
       setCoinsEarned((c) => c + sessionCoins);
       setExpEarned((e) => e + sessionExp);
 
@@ -361,14 +363,24 @@ export const Adventure: React.FC<AdventureProps> = ({
           {/* Left panel: Pet and session status */}
           <div className="game-card flex flex-col items-center justify-center border-pink-100 py-8 text-center relative overflow-hidden">
             {/* Session Rewards display */}
-            <div className="absolute top-3 left-3 bg-amber-50 border border-amber-200 rounded-full px-2.5 py-1 flex items-center gap-1 text-xs font-bold text-amber-700">
-              <Coins className="w-3.5 h-3.5" />
-              +{coinsEarned}
+            <div className="absolute top-3 left-3 bg-amber-50 border border-amber-200 rounded-2xl px-2.5 py-1.5 flex flex-col items-center justify-center text-xs font-bold text-amber-700 shadow-sm">
+              <div className="flex items-center gap-1">
+                <Coins className="w-3.5 h-3.5" />
+                +{coinsEarned}
+              </div>
+              {stats.homeLevel && stats.homeLevel >= 2 && (
+                <span className="text-[8px] text-amber-500 font-extrabold -mt-0.5">Lv.{stats.homeLevel} 加成</span>
+              )}
             </div>
 
-            <div className="absolute top-3 right-3 bg-purple-50 border border-purple-200 rounded-full px-2.5 py-1 flex items-center gap-1 text-xs font-bold text-purple-700">
-              <Sparkles className="w-3.5 h-3.5" />
-              +{expEarned} EXP
+            <div className="absolute top-3 right-3 bg-purple-50 border border-purple-200 rounded-2xl px-2.5 py-1.5 flex flex-col items-center justify-center text-xs font-bold text-purple-700 shadow-sm">
+              <div className="flex items-center gap-1">
+                <Sparkles className="w-3.5 h-3.5" />
+                +{expEarned} EXP
+              </div>
+              {stats.homeLevel && stats.homeLevel >= 3 && (
+                <span className="text-[8px] text-purple-500 font-extrabold -mt-0.5">Lv.{stats.homeLevel} 加成</span>
+              )}
             </div>
 
             {/* Pet sprite */}
@@ -558,16 +570,22 @@ export const Adventure: React.FC<AdventureProps> = ({
               <span className="text-slate-400 text-xs font-bold block mb-1">正確率</span>
               <span className="text-2xl font-extrabold text-slate-600">{accuracy}%</span>
             </div>
-            <div className="bg-amber-50 rounded-2xl p-4 border border-amber-100">
+            <div className="bg-amber-50 rounded-2xl p-4 border border-amber-100 flex flex-col justify-center items-center">
               <span className="text-amber-500 text-xs font-bold block mb-1">獲得金幣</span>
               <span className="text-2xl font-extrabold text-amber-600 flex items-center justify-center gap-1">
                 <Coins className="w-5 h-5" />
                 {coinsEarned}
               </span>
+              {stats.homeLevel && stats.homeLevel >= 2 && (
+                <span className="text-[10px] text-amber-500 font-extrabold mt-1">含小屋 10% 金幣加成</span>
+              )}
             </div>
-            <div className="bg-purple-50 rounded-2xl p-4 border border-purple-100">
+            <div className="bg-purple-50 rounded-2xl p-4 border border-purple-100 flex flex-col justify-center items-center">
               <span className="text-purple-500 text-xs font-bold block mb-1">萌寵經驗</span>
               <span className="text-2xl font-extrabold text-purple-600">+{expEarned} EXP</span>
+              {stats.homeLevel && stats.homeLevel >= 3 && (
+                <span className="text-[10px] text-purple-500 font-extrabold mt-1">含小屋 15% 經驗加成</span>
+              )}
             </div>
           </div>
 

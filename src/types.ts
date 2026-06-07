@@ -50,6 +50,7 @@ export interface UserStats {
   equippedFurniture?: string[]; // Equipped furniture in room
   achievements?: string[]; // e.g. ['hatch', 'evolve', 'streak_7']
   petDiary?: string[]; // Event logs
+  homeLevel?: number; // Level of the pet's home (1 to 5)
 }
 
 export interface StudySession {

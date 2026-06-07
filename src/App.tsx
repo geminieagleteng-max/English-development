@@ -23,7 +23,8 @@ const DEFAULT_STATS: UserStats = {
   furnitureOwned: [],
   equippedFurniture: [],
   achievements: [],
-  petDiary: ['寵物培育日記正式開啟！']
+  petDiary: ['寵物培育日記正式開啟！'],
+  homeLevel: 1
 };
 
 function App() {
@@ -61,7 +62,8 @@ function App() {
           furnitureOwned: parsedStats.furnitureOwned || [],
           equippedFurniture: parsedStats.equippedFurniture || [],
           achievements: parsedStats.achievements || [],
-          petDiary: parsedStats.petDiary || ['寵物培育日記正式開啟！']
+          petDiary: parsedStats.petDiary || ['寵物培育日記正式開啟！'],
+          homeLevel: parsedStats.homeLevel || 1
         };
 
         // Calculate daily login streak & satiety decay

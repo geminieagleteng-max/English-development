@@ -684,3 +684,186 @@ input[type="text"]:focus {
   border-top-color: #cbd5e1;
   z-index: 1;
 }
+
+/* ==========================================================================
+   Home Upgrades Themes Styling overrides (theme-1 to theme-5)
+   ========================================================================== */
+
+/* Theme 1: 和風簡約屋 (Default Level 1) - styled by default. Nothing to override. */
+
+/* Theme 2: 蜜粉草莓房 (Level 2) - Sweet pink candy themed room */
+.neko-room.theme-2 {
+  background: linear-gradient(180deg, #ffdcd8 0%, #ffa8a1 100%);
+}
+.neko-room.theme-2 .neko-garden-grid {
+  background-image: 
+    radial-gradient(#ffc8c3 2px, transparent 2px),
+    radial-gradient(#ffc8c3 2px, transparent 2px);
+  opacity: 0.5;
+}
+.neko-room.theme-2 .neko-platform-tatami {
+  background: #fff0f2;
+  border-left-color: #f7b2bd;
+  border-bottom-color: #f59da9;
+  border-top-color: #ffeff2;
+  border-right-color: #ffeff2;
+  background-image: 
+    repeating-linear-gradient(90deg, transparent, transparent 18px, rgba(245, 157, 169, 0.2) 18px, rgba(245, 157, 169, 0.2) 20px);
+}
+.neko-room.theme-2 .neko-platform-wood {
+  background: #ffe5ec;
+  border-left-color: #ffb3c6;
+  border-bottom-color: #ff85a1;
+  border-top-color: #fff0f3;
+  border-right-color: #fff0f3;
+  background-image: 
+    repeating-linear-gradient(0deg, transparent, transparent 24px, rgba(255, 133, 161, 0.2) 24px, rgba(255, 133, 161, 0.2) 26px);
+}
+.neko-room.theme-2 .neko-shoji {
+  background: rgba(255, 240, 245, 0.95);
+  border-color: #fb6f92;
+}
+.neko-room.theme-2 .neko-shoji-line,
+.neko-room.theme-2 .neko-shoji-vertical {
+  background-color: #fb6f92;
+}
+
+/* Theme 3: 蔚藍極客房 (Level 3) - Cozy cyber tech style, cool blue & modern lines */
+.neko-room.theme-3 {
+  background: linear-gradient(180deg, #bae6fd 0%, #7dd3fc 100%);
+}
+.neko-room.theme-3 .neko-garden-grid {
+  background-image: 
+    radial-gradient(#93c5fd 2px, transparent 2px),
+    radial-gradient(#93c5fd 2px, transparent 2px);
+  opacity: 0.6;
+}
+.neko-room.theme-3 .neko-platform-tatami {
+  background: #f0f9ff;
+  border-left-color: #7dd3fc;
+  border-bottom-color: #38bdf8;
+  border-top-color: #f0fdf4;
+  border-right-color: #f0fdf4;
+  background-image: 
+    repeating-linear-gradient(90deg, transparent, transparent 18px, rgba(56, 189, 248, 0.2) 18px, rgba(56, 189, 248, 0.2) 20px);
+}
+.neko-room.theme-3 .neko-platform-wood {
+  background: #e0f2fe;
+  border-left-color: #bae6fd;
+  border-bottom-color: #7dd3fc;
+  border-top-color: #f0f9ff;
+  border-right-color: #f0f9ff;
+  background-image: 
+    repeating-linear-gradient(0deg, transparent, transparent 24px, rgba(125, 211, 252, 0.25) 24px, rgba(125, 211, 252, 0.25) 26px);
+}
+.neko-room.theme-3 .neko-shoji {
+  background: rgba(240, 253, 250, 0.95);
+  border-color: #0284c7;
+}
+.neko-room.theme-3 .neko-shoji-line,
+.neko-room.theme-3 .neko-shoji-vertical {
+  background-color: #0284c7;
+}
+
+/* Theme 4: 幻彩星空殿 (Level 4) - Indigo starry space lounge with neon glow */
+.neko-room.theme-4 {
+  background: linear-gradient(180deg, #1e1b4b 0%, #0f172a 100%);
+}
+.neko-room.theme-4 .neko-garden-grid {
+  /* Starry background */
+  background-image: 
+    radial-gradient(#cbd5e1 1px, transparent 1px),
+    radial-gradient(#fff 2px, transparent 2px);
+  background-size: 50px 50px, 120px 120px;
+  background-position: 0 0, 40px 60px;
+  opacity: 0.8;
+  animation: pulse 4s ease-in-out infinite alternate;
+}
+.neko-room.theme-4 .neko-platform-tatami {
+  background: #312e81;
+  border-left-color: #4f46e5;
+  border-bottom-color: #6366f1;
+  border-top-color: #818cf8;
+  border-right-color: #818cf8;
+  background-image: 
+    repeating-linear-gradient(90deg, transparent, transparent 18px, rgba(129, 140, 248, 0.25) 18px, rgba(129, 140, 248, 0.25) 20px);
+  box-shadow: 0 15px 30px rgba(99, 102, 241, 0.15);
+}
+.neko-room.theme-4 .neko-platform-wood {
+  background: #1e1b4b;
+  border-left-color: #3730a3;
+  border-bottom-color: #4f46e5;
+  border-top-color: #6366f1;
+  border-right-color: #6366f1;
+  background-image: 
+    repeating-linear-gradient(0deg, transparent, transparent 24px, rgba(99, 102, 241, 0.2) 24px, rgba(99, 102, 241, 0.2) 26px);
+  box-shadow: 0 20px 35px rgba(79, 70, 229, 0.2);
+}
+.neko-room.theme-4 .neko-shoji {
+  background: rgba(30, 27, 75, 0.9);
+  border-color: #818cf8;
+  box-shadow: 0 0 15px rgba(129, 140, 248, 0.4);
+}
+.neko-room.theme-4 .neko-shoji-line,
+.neko-room.theme-4 .neko-shoji-vertical {
+  background-color: #818cf8;
+}
+.neko-room.theme-4 .neko-dialogue {
+  background-color: #1e1b4b;
+  color: #e2e8f0;
+  border-color: #6366f1;
+}
+.neko-room.theme-4 .neko-dialogue::after {
+  border-top-color: #1e1b4b;
+}
+.neko-room.theme-4 .neko-dialogue::before {
+  border-top-color: #6366f1;
+}
+
+/* Theme 5: 皇家水晶宮 (Level 5) - Golden marble luxury palace */
+.neko-room.theme-5 {
+  background: linear-gradient(180deg, #fef3c7 0%, #fde68a 100%);
+}
+.neko-room.theme-5 .neko-garden-grid {
+  /* Golden glitter specs */
+  background-image: 
+    radial-gradient(#fbbf24 2.5px, transparent 2.5px),
+    radial-gradient(#f59e0b 2px, transparent 2px);
+  background-size: 30px 30px, 80px 80px;
+  background-position: 0 0, 15px 40px;
+  opacity: 0.45;
+}
+.neko-room.theme-5 .neko-platform-tatami {
+  background: #fffbeb;
+  border-left-color: #f59e0b;
+  border-bottom-color: #d97706;
+  border-top-color: #fef3c7;
+  border-right-color: #fef3c7;
+  background-image: 
+    repeating-linear-gradient(90deg, transparent, transparent 18px, rgba(217, 119, 6, 0.15) 18px, rgba(217, 119, 6, 0.15) 20px);
+  box-shadow: 0 15px 30px rgba(217, 119, 6, 0.12), 0 0 20px rgba(251, 191, 36, 0.2);
+}
+.neko-room.theme-5 .neko-platform-wood {
+  background: #fffdf5;
+  border-left-color: #fbbf24;
+  border-bottom-color: #f59e0b;
+  border-top-color: #fef3c7;
+  border-right-color: #fef3c7;
+  background-image: 
+    repeating-linear-gradient(0deg, transparent, transparent 24px, rgba(245, 158, 11, 0.12) 24px, rgba(245, 158, 11, 0.12) 26px);
+  box-shadow: 0 20px 35px rgba(245, 158, 11, 0.15), 0 0 25px rgba(251, 191, 36, 0.25);
+}
+.neko-room.theme-5 .neko-shoji {
+  background: rgba(254, 243, 199, 0.95);
+  border-color: #d97706;
+  box-shadow: 0 0 15px rgba(217, 119, 6, 0.3);
+}
+.neko-room.theme-5 .neko-shoji-line,
+.neko-room.theme-5 .neko-shoji-vertical {
+  background-color: #d97706;
+}
+.neko-room.theme-5 .neko-sidebar-btn {
+  border-color: #fde047;
+  box-shadow: 0 6px 16px rgba(217, 119, 6, 0.12);
+}
+

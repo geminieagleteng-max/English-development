@@ -12,6 +12,29 @@ import catAdultImg from '../assets/cat_adult.png';
 import dogBabyImg from '../assets/dog_baby.png';
 import dogAdultImg from '../assets/dog_adult.png';
 
+// Home Themes config
+const HOME_THEMES = [
+  { level: 1, name: '和風簡約屋', desc: '綠色草坪與日式榻榻米，寧靜恬雅。', cost: 0, bonus: '無' },
+  { level: 2, name: '蜜粉草莓房', desc: '粉色牆壁與香甜草莓地毯，浪漫可愛。', cost: 150, bonus: '答題金幣加成 +10%' },
+  { level: 3, name: '蔚藍極客房', desc: '清爽科技感與深藍木質裝潢，智慧專注。', cost: 300, bonus: '答題經驗加成 +15%' },
+  { level: 4, name: '幻彩星空殿', desc: '神祕星軌壁紙與紫色霓光地板，夢幻瑰麗。', cost: 500, bonus: '每日簽到金幣加成 +20%' },
+  { level: 5, name: '皇家水晶宮', desc: '白大理石紋路與奢華金邊，高貴無上。', cost: 800, bonus: '訪客贈禮金額翻倍 (2x)' }
+];
+
+// Clothing Items config
+const CLOTHING_ITEMS = [
+  { icon: '🎀', name: '俏皮粉蝴蝶結', price: 50, rarity: 'Common', desc: '粉紅色的可愛蝴蝶結，讓萌寵看起來更精緻。' },
+  { icon: '🎓', name: '學士博士帽', price: 80, rarity: 'Common', desc: '象徵學識的學士帽，戴上後感覺英文能力大增。' },
+  { icon: '👓', name: '知性黑框眼鏡', price: 60, rarity: 'Common', desc: '文青風格的黑框眼鏡，充滿知性與學習氣息。' },
+  { icon: '🎩', name: '紳士高頂禮帽', price: 100, rarity: 'Rare', desc: '優雅的黑色高帽，彷彿要帶領寵物參加魔術秀。' },
+  { icon: '🧣', name: '溫暖紅圍巾', price: 70, rarity: 'Common', desc: '軟綿綿的紅圍巾，在冷氣房裡給萌寵溫暖的保護。' },
+  { icon: '🕶️', name: '酷炫太陽眼鏡', price: 90, rarity: 'Rare', desc: '戴上後帥氣逼人，成為社區裡最潮的單字明星！' },
+  { icon: '👑', name: '黃金冒險皇冠', price: 150, rarity: 'Rare', desc: '閃閃發光的黃金皇冠，只有最勇敢的冒險者配得上。' },
+  { icon: '👼', name: '天使魔法光環', price: 200, rarity: 'Epic', desc: '漂浮在頭頂的金色光環，自帶神聖的療癒背景光芒。' },
+  { icon: '🎒', name: '小丸子雙肩包', price: 120, rarity: 'Rare', desc: '復古紅雙肩書包，讓萌寵重溫小學堂的學習樂趣。' },
+  { icon: '🦋', name: '夢幻仙子翅膀', price: 250, rarity: 'Epic', desc: '透明斑斕的精靈翅膀，讓寵物飛躍單字的難關。' }
+];
+
 interface PetRoomProps {
   pet: Pet | null;
   stats: UserStats;
@@ -78,6 +101,7 @@ export const PetRoom: React.FC<PetRoomProps> = ({
   // Local state for UI
   const [pettingHearts, setPettingHearts] = useState<{ id: number; x: number; y: number }[]>([]);
   const [activeTab, setActiveTab] = useState<'care' | 'shop' | 'gacha' | 'wardrobe' | 'diary'>('care');
+  const [shopSubTab, setShopSubTab] = useState<'food' | 'clothing'>('food');
   const [newPetName, setNewPetName] = useState<string>('');
   const [selectedPetType, setSelectedPetType] = useState<PetType>('slime');
   const [petActionState, setPetActionState] = useState<'idle' | 'jump' | 'sad' | 'evolve'>('idle');
@@ -119,12 +143,14 @@ export const PetRoom: React.FC<PetRoomProps> = ({
       if (v.id === id) {
         if (!v.giftClaimed) {
           playSfx('correct');
+          // Double gift amount if home level is 5 (Royal Palace)
+          const finalGift = stats.homeLevel === 5 ? v.giftAmount * 2 : v.giftAmount;
           onUpdateStats(prevStats => ({
             ...prevStats,
-            coins: prevStats.coins + v.giftAmount,
-            petDiary: [`${new Date().toLocaleDateString()}: 訪客 ${v.name} 來訪並留下了 ${v.giftAmount} 金幣！🎁`, ...(prevStats.petDiary || [])]
+            coins: prevStats.coins + finalGift,
+            petDiary: [`${new Date().toLocaleDateString()}: 訪客 ${v.name} 來訪並留下了 ${finalGift} 金幣！🎁${stats.homeLevel === 5 ? ' (皇家翻倍)' : ''}`, ...(prevStats.petDiary || [])]
           }));
-          alert(`🎁 訪客 ${v.name} 留下了 ${v.giftAmount} 金幣禮物！已存入您的錢包。`);
+          alert(`🎁 訪客 ${v.name} 留下了 ${finalGift} 金幣禮物！${stats.homeLevel === 5 ? '（小屋 Lv.5 加成：禮物翻倍！）' : ''}已存入您的錢包。`);
           return { ...v, giftClaimed: true, dialogueVisible: true };
         }
         return { ...v, dialogueVisible: !v.dialogueVisible };
@@ -498,6 +524,82 @@ export const PetRoom: React.FC<PetRoomProps> = ({
     }, 1200);
   };
 
+  // wear accessory toggle
+  const toggleAccessory = (accIcon: string) => {
+    playSfx('click');
+    onUpdateStats((prev) => {
+      const equipped = prev.equippedAccessories || [];
+      const newEquipped = equipped.includes(accIcon)
+        ? equipped.filter((a) => a !== accIcon)
+        : [...equipped, accIcon];
+      return {
+        ...prev,
+        equippedAccessories: newEquipped
+      };
+    });
+  };
+
+  // Toggle Furniture toggle
+  const toggleFurniture = (furnIcon: string) => {
+    playSfx('click');
+    onUpdateStats((prev) => {
+      const equipped = prev.equippedFurniture || [];
+      const newEquipped = equipped.includes(furnIcon)
+        ? equipped.filter((f) => f !== furnIcon)
+        : [...equipped, furnIcon];
+      return {
+        ...prev,
+        equippedFurniture: newEquipped
+      };
+    });
+  };
+
+  // Purchase clothing accessories directly
+  const handleBuyAccessory = (accIcon: string, price: number, name: string) => {
+    if (stats.coins < price) {
+      playSfx('wrong');
+      alert('金幣不足，無法購買衣飾！快去單字關卡冒險賺取金幣吧！');
+      return;
+    }
+
+    playSfx('levelup');
+    onUpdateStats(prev => {
+      const owned = prev.accessoriesOwned || [];
+      if (owned.includes(accIcon)) return prev;
+      return {
+        ...prev,
+        coins: prev.coins - price,
+        accessoriesOwned: [...owned, accIcon],
+        petDiary: [`${new Date().toLocaleDateString()}: 在衣飾商店購買了裝扮【${name} ${accIcon}】！👔`, ...(prev.petDiary || [])]
+      };
+    });
+    alert(`🎉 成功購買裝扮【${name} ${accIcon}】！已加入衣櫥中，快去「穿扮」分頁進行搭配吧！`);
+  };
+
+  // Upgrade pet home level
+  const handleUpgradeHome = (cost: number, nextLvl: number, themeName: string, bonusDesc: string) => {
+    if (stats.coins < cost) {
+      playSfx('wrong');
+      alert('金幣不足，無法升級小屋！');
+      return;
+    }
+
+    playSfx('evolve');
+    setPetActionState('evolve');
+
+    onUpdateStats(prev => ({
+      ...prev,
+      coins: prev.coins - cost,
+      homeLevel: nextLvl,
+      petDiary: [`${new Date().toLocaleDateString()}: 成功將小屋升級至 Lv.${nextLvl} 【${themeName}】！⭐ 加成效果：${bonusDesc}`, ...(prev.petDiary || [])]
+    }));
+
+    setTimeout(() => {
+      setPetActionState('idle');
+      alert(`🎉 恭喜！您成功將小屋升級至 Lv.${nextLvl} 【${themeName}】！\n現在享有：${bonusDesc}！`);
+    }, 1200);
+  };
+
   // Sign In reward claiming
   const claimSignIn = () => {
     const consecutive = (stats.consecutiveCheckIns || 0) % 7;
@@ -507,15 +609,25 @@ export const PetRoom: React.FC<PetRoomProps> = ({
     playSfx('levelup');
 
     onUpdateStats((prev) => {
+      // 20% bonus coins if home level is 4 or higher
       let coinsBonus = reward.type === 'coins' ? (reward.value as number) : 0;
+      if (reward.type === 'coins' && prev.homeLevel && prev.homeLevel >= 4) {
+        coinsBonus = Math.round(coinsBonus * 1.2);
+      }
+      
       let ownedAcc = prev.accessoriesOwned || [];
 
       if (reward.type === 'accessory' && !ownedAcc.includes(reward.value as string)) {
         ownedAcc = [...ownedAcc, reward.value as string];
       }
 
+      const isCoinsWithBonus = reward.type === 'coins' && prev.homeLevel && prev.homeLevel >= 4;
+      const rewardString = isCoinsWithBonus
+        ? `${coinsBonus} 金幣 (含小屋 20% 加成)`
+        : reward.rewardText;
+
       const updatedDiary = [
-        `${new Date().toLocaleDateString()}: 完成每日簽到，領取了 ${reward.rewardText} ${reward.icon}！📅`,
+        `${new Date().toLocaleDateString()}: 完成每日簽到，領取了 ${rewardString} ${reward.icon}！📅`,
         ...(prev.petDiary || [])
       ];
 
@@ -550,38 +662,12 @@ export const PetRoom: React.FC<PetRoomProps> = ({
       });
     }
 
+    const finalRewardText = reward.type === 'coins' && stats.homeLevel && stats.homeLevel >= 4
+      ? `${Math.round((reward.value as number) * 1.2)} 金幣 (含小屋 20% 加成)`
+      : reward.rewardText;
+
     setShowSignInModal(false);
-    alert(`📅 簽到成功！您已獲得：${reward.rewardText} ${reward.icon}！`);
-  };
-
-  // Wear accessory toggle
-  const toggleAccessory = (accIcon: string) => {
-    playSfx('click');
-    onUpdateStats((prev) => {
-      const equipped = prev.equippedAccessories || [];
-      const newEquipped = equipped.includes(accIcon)
-        ? equipped.filter((a) => a !== accIcon)
-        : [...equipped, accIcon];
-      return {
-        ...prev,
-        equippedAccessories: newEquipped
-      };
-    });
-  };
-
-  // Toggle Furniture toggle
-  const toggleFurniture = (furnIcon: string) => {
-    playSfx('click');
-    onUpdateStats((prev) => {
-      const equipped = prev.equippedFurniture || [];
-      const newEquipped = equipped.includes(furnIcon)
-        ? equipped.filter((f) => f !== furnIcon)
-        : [...equipped, furnIcon];
-      return {
-        ...prev,
-        equippedFurniture: newEquipped
-      };
-    });
+    alert(`📅 簽到成功！您已獲得：${finalRewardText} ${reward.icon}！`);
   };
 
   // Visit neighbor
@@ -712,7 +798,7 @@ export const PetRoom: React.FC<PetRoomProps> = ({
           </div>
 
           <div className="neko-room-container">
-            <div className="neko-room">
+            <div className={`neko-room theme-${stats.homeLevel || 1}`}>
               {/* Garden Grid */}
               <div className="neko-garden-grid" />
 
@@ -1073,9 +1159,9 @@ export const PetRoom: React.FC<PetRoomProps> = ({
                 className={`py-2 rounded-xl font-bold transition-all text-center text-xs ${
                   activeTab === 'care' ? 'bg-white text-pink-500 shadow-sm border border-slate-100' : 'text-slate-400 hover:text-slate-600'
                 }`}
-                title="日常培育"
+                title="小屋升級與培育"
               >
-                培育
+                小屋
               </button>
               <button
                 onClick={() => { playSfx('click'); setActiveTab('shop'); }}
@@ -1115,74 +1201,205 @@ export const PetRoom: React.FC<PetRoomProps> = ({
               </button>
             </div>
 
-            {/* Tab care: Routine care */}
-            {activeTab === 'care' && (
-              <div className="flex flex-col gap-4">
-                <button
-                  onClick={() => { playSfx('click'); onNavigate('adventure'); }}
-                  className="w-full btn-bubble btn-secondary py-3 text-base"
-                >
-                  ⚔️ 前往單字關卡冒險
-                </button>
-                <button
-                  onClick={() => { playSfx('click'); onNavigate('mistakes'); }}
-                  className="w-full btn-bubble btn-gray py-2.5 text-sm"
-                >
-                  📖 前往錯題本溫習
-                </button>
-                <button
-                  onClick={() => { playSfx('click'); onNavigate('analytics'); }}
-                  className="w-full btn-bubble btn-blue py-2.5 text-sm"
-                >
-                  📊 查看學習統計圖表
-                </button>
+            {/* Tab care: Routine care & Home Upgrade */}
+            {activeTab === 'care' && (() => {
+              const currentLvl = stats.homeLevel || 1;
+              const currentTheme = HOME_THEMES.find(t => t.level === currentLvl) || HOME_THEMES[0];
+              const nextTheme = HOME_THEMES.find(t => t.level === currentLvl + 1);
 
-                <div className="bg-slate-50 border border-slate-100 rounded-xl p-3 text-[11px] text-slate-400 leading-relaxed font-semibold">
-                  <p className="text-slate-500 font-bold mb-1">💡 學習成癮指南：</p>
-                  <p>1. 每日登入可自動觸發簽到，簽到連續天數越高獎勵越豐厚！</p>
-                  <p>2. 答題能賺取金幣，金幣可以用於在商店購買點心或抽扭蛋 🎰</p>
-                  <p>3. 扭蛋機有隨機配飾 🎀 與家具 🛏️，可前往「穿扮」分頁進行搭配與布置！</p>
-                </div>
-              </div>
-            )}
+              return (
+                <div className="flex flex-col gap-4">
+                  {/* Home Upgrade Section */}
+                  <div className="bg-gradient-to-br from-pink-50/50 to-amber-50/50 border-2 border-pink-100 rounded-2xl p-4 shadow-sm">
+                    <h4 className="text-sm font-extrabold text-slate-700 mb-2 flex items-center gap-1.5">
+                      🏠 我的小屋等級：Lv. {currentLvl}
+                    </h4>
+                    <p className="text-xs text-slate-500 font-bold">目前風格：【{currentTheme.name}】</p>
+                    <p className="text-[10px] text-slate-400 mt-1 font-semibold leading-relaxed">{currentTheme.desc}</p>
+                    
+                    {currentTheme.bonus !== '無' && (
+                      <span className="inline-block mt-2 text-[10px] font-bold bg-pink-100 text-pink-600 px-2 py-0.5 rounded-full">
+                        ✨ 效果中：{currentTheme.bonus}
+                      </span>
+                    )}
 
-            {/* Tab shop: Food store */}
-            {activeTab === 'shop' && (
-              <div className="flex flex-col gap-3 max-h-96 overflow-y-auto pr-1">
-                {shopItems.map((item) => (
-                  <div
-                    key={item.id}
-                    className="border-2 border-slate-100 rounded-xl p-3 flex flex-col justify-between gap-2 bg-slate-50 hover:bg-slate-100/30 transition-colors"
-                  >
-                    <div className="flex justify-between items-start">
-                      <div className="flex items-center gap-2">
-                        <span className="text-2xl bg-white p-1 rounded-xl shadow-sm border border-slate-100">{item.icon}</span>
-                        <div>
-                          <p className="font-bold text-slate-700 text-sm flex items-center gap-1.5">
-                            {item.name}
-                            {item.type === 'potion' && (
-                              <span className="bg-red-100 text-red-600 text-[9px] font-bold px-1.5 py-0.5 rounded-full">解毒</span>
-                            )}
+                    {/* Next level upgrade */}
+                    <div className="border-t border-dashed border-pink-200 mt-3 pt-3">
+                      {nextTheme ? (
+                        <div className="flex flex-col gap-2">
+                          <p className="text-xs font-bold text-slate-600">
+                            下一級：Lv.{nextTheme.level} 【{nextTheme.name}】
                           </p>
-                          <p className="text-slate-400 text-xs mt-0.5 leading-snug">{item.description}</p>
+                          <p className="text-[10px] text-slate-400 font-semibold">{nextTheme.desc}</p>
+                          <p className="text-[10px] text-amber-600 font-extrabold flex items-center gap-1">
+                            🚀 升級加成：{nextTheme.bonus}
+                          </p>
+                          
+                          <button
+                            onClick={() => handleUpgradeHome(nextTheme.cost, nextTheme.level, nextTheme.name, nextTheme.bonus)}
+                            disabled={stats.coins < nextTheme.cost}
+                            className={`w-full py-2 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all ${
+                              stats.coins >= nextTheme.cost
+                                ? 'bg-amber-500 hover:bg-amber-600 text-white shadow-md active:scale-95'
+                                : 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed'
+                            }`}
+                          >
+                            <Coins className="w-3.5 h-3.5" /> 花費 {nextTheme.cost} 金幣升級
+                          </button>
                         </div>
-                      </div>
-                    </div>
-
-                    <div className="flex justify-between items-center border-t border-dashed border-slate-200 pt-2 text-xs">
-                      <div className="flex gap-2 text-slate-500 font-medium">
-                        {item.satietyRestore > 0 && <span>飽食度 +{item.satietyRestore}</span>}
-                        {item.affectionIncrease > 0 && <span>好感度 +{item.affectionIncrease}</span>}
-                      </div>
-                      <button
-                        onClick={() => handleBuyAndFeed(item)}
-                        className="btn-bubble btn-accent py-1.5 px-3 text-xs font-extrabold flex items-center gap-1"
-                      >
-                        <Coins className="w-3 h-3" /> {item.price} 購買
-                      </button>
+                      ) : (
+                        <div className="text-center py-2 bg-pink-50 border border-pink-100 rounded-xl">
+                          <span className="text-xs font-extrabold text-pink-600">🎉 小屋已升級至最頂級！</span>
+                          <p className="text-[9px] text-pink-500 font-bold mt-0.5">已獲得所有小屋學習加成效果</p>
+                        </div>
+                      )}
                     </div>
                   </div>
-                ))}
+
+                  {/* Navigation buttons */}
+                  <div className="flex flex-col gap-2">
+                    <button
+                      onClick={() => { playSfx('click'); onNavigate('adventure'); }}
+                      className="w-full btn-bubble btn-secondary py-3 text-base"
+                    >
+                      ⚔️ 前往單字關卡冒險
+                    </button>
+                    <button
+                      onClick={() => { playSfx('click'); onNavigate('mistakes'); }}
+                      className="w-full btn-bubble btn-gray py-2.5 text-sm"
+                    >
+                      📖 前往錯題本溫習
+                    </button>
+                    <button
+                      onClick={() => { playSfx('click'); onNavigate('analytics'); }}
+                      className="w-full btn-bubble btn-blue py-2.5 text-sm"
+                    >
+                      📊 查看學習統計圖表
+                    </button>
+                  </div>
+
+                  <div className="bg-slate-50 border border-slate-100 rounded-xl p-3 text-[11px] text-slate-400 leading-relaxed font-semibold">
+                    <p className="text-slate-500 font-bold mb-1">💡 學習成癮指南：</p>
+                    <p>1. 每日登入可自動觸發簽到，簽到連續天數越高獎勵越豐厚！</p>
+                    <p>2. 答題能賺取金幣，金幣可以用於升級小屋或是在商店購買衣裝！</p>
+                    <p>3. 升級小屋能獲得額外的金幣、經驗值與簽到、訪客加成效果 🏠</p>
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Tab shop: Food & Clothing Sub-tabs */}
+            {activeTab === 'shop' && (
+              <div className="flex flex-col gap-4">
+                {/* Shop Sub-tabs */}
+                <div className="flex gap-2 bg-slate-100/80 p-1 rounded-xl">
+                  <button
+                    onClick={() => { playSfx('click'); setShopSubTab('food'); }}
+                    className={`flex-1 py-1.5 rounded-lg font-extrabold text-xs transition-all ${
+                      shopSubTab === 'food'
+                        ? 'bg-white text-amber-600 shadow-sm border border-slate-100'
+                        : 'text-slate-500 hover:text-slate-700'
+                    }`}
+                  >
+                    🍰 點心藥水
+                  </button>
+                  <button
+                    onClick={() => { playSfx('click'); setShopSubTab('clothing'); }}
+                    className={`flex-1 py-1.5 rounded-lg font-extrabold text-xs transition-all ${
+                      shopSubTab === 'clothing'
+                        ? 'bg-white text-pink-600 shadow-sm border border-slate-100'
+                        : 'text-slate-500 hover:text-slate-700'
+                    }`}
+                  >
+                    👔 衣服配飾
+                  </button>
+                </div>
+
+                {shopSubTab === 'food' ? (
+                  <div className="flex flex-col gap-3 max-h-96 overflow-y-auto pr-1">
+                    {shopItems.map((item) => (
+                      <div
+                        key={item.id}
+                        className="border-2 border-slate-100 rounded-xl p-3 flex flex-col justify-between gap-2 bg-slate-50 hover:bg-slate-100/30 transition-colors"
+                      >
+                        <div className="flex justify-between items-start">
+                          <div className="flex items-center gap-2">
+                            <span className="text-2xl bg-white p-1 rounded-xl shadow-sm border border-slate-100">{item.icon}</span>
+                            <div>
+                              <p className="font-bold text-slate-700 text-sm flex items-center gap-1.5">
+                                {item.name}
+                                {item.type === 'potion' && (
+                                  <span className="bg-red-100 text-red-600 text-[9px] font-bold px-1.5 py-0.5 rounded-full">解毒</span>
+                                )}
+                              </p>
+                              <p className="text-slate-400 text-xs mt-0.5 leading-snug">{item.description}</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex justify-between items-center border-t border-dashed border-slate-200 pt-2 text-xs">
+                          <div className="flex gap-2 text-slate-500 font-medium">
+                            {item.satietyRestore > 0 && <span>飽食度 +{item.satietyRestore}</span>}
+                            {item.affectionIncrease > 0 && <span>好感度 +{item.affectionIncrease}</span>}
+                          </div>
+                          <button
+                            onClick={() => handleBuyAndFeed(item)}
+                            className="btn-bubble btn-accent py-1.5 px-3 text-xs font-extrabold flex items-center gap-1"
+                          >
+                            <Coins className="w-3 h-3" /> {item.price} 購買
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-3 max-h-96 overflow-y-auto pr-1">
+                    {CLOTHING_ITEMS.map((item) => {
+                      const isOwned = (stats.accessoriesOwned || []).includes(item.icon) || (stats.equippedAccessories || []).includes(item.icon);
+                      let rarityColor = 'bg-slate-100 text-slate-500';
+                      if (item.rarity === 'Rare') rarityColor = 'bg-blue-100 text-blue-600';
+                      if (item.rarity === 'Epic') rarityColor = 'bg-purple-100 text-purple-600';
+
+                      return (
+                        <div
+                          key={item.icon}
+                          className="border-2 border-slate-100 rounded-xl p-3 flex flex-col justify-between gap-2 bg-slate-50 hover:bg-slate-100/30 transition-colors"
+                        >
+                          <div className="flex justify-between items-start">
+                            <div className="flex items-center gap-2">
+                              <span className="text-2xl bg-white p-1 rounded-xl shadow-sm border border-slate-100">{item.icon}</span>
+                              <div>
+                                <p className="font-bold text-slate-700 text-sm flex items-center gap-1.5">
+                                  {item.name}
+                                  <span className={`${rarityColor} text-[9px] font-bold px-1.5 py-0.5 rounded-full`}>
+                                    {item.rarity === 'Common' ? '普通' : item.rarity === 'Rare' ? '稀有' : '史詩'}
+                                  </span>
+                                </p>
+                                <p className="text-slate-400 text-xs mt-0.5 leading-snug">{item.desc}</p>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex justify-between items-center border-t border-dashed border-slate-200 pt-2 text-xs">
+                            <span className="text-slate-500 font-bold">分類: 寵物頭飾/服裝</span>
+                            {isOwned ? (
+                              <span className="bg-slate-200 text-slate-400 py-1.5 px-4 rounded-xl font-bold cursor-not-allowed">
+                                已擁有
+                              </span>
+                            ) : (
+                              <button
+                                onClick={() => handleBuyAccessory(item.icon, item.price, item.name)}
+                                className="btn-bubble btn-accent py-1.5 px-3 text-xs font-extrabold flex items-center gap-1"
+                              >
+                                <Coins className="w-3 h-3" /> {item.price} 購買
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             )}
 
