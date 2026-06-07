@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { Pet, UserStats, ShopItem, PetType } from '../types';
 import { playSfx } from '../audioHelper';
-import { Heart, Star, Coins, Sparkles, User, MessageSquare, Check } from 'lucide-react';
+import { Coins, Sparkles, User, MessageSquare, Check } from 'lucide-react';
 
 // Image assets imports
 import eggImg from '../assets/egg.png';
@@ -49,6 +49,25 @@ const SIGN_IN_REWARDS = [
   { day: 7, rewardText: '稀有飾品', icon: '👑', type: 'accessory', value: '👑' }
 ];
 
+interface Visitor {
+  id: string;
+  name: string;
+  emoji: string;
+  spot: 'tatami' | 'deck' | 'garden';
+  msg: string;
+  giftAmount: number;
+  giftClaimed: boolean;
+  dialogueVisible: boolean;
+}
+
+const VISITOR_TEMPLATES: { name: string; emoji: string; spot: 'tatami' | 'deck' | 'garden'; msg: string; giftAmount: number }[] = [
+  { name: '斑斑', emoji: '🐱', spot: 'tatami', msg: '呼呼…榻榻米躺著真舒服 💤', giftAmount: 8 },
+  { name: '黑皮', emoji: '🐕', spot: 'deck', msg: '汪！今天學習也很努力喔！給你金幣 🪙', giftAmount: 12 },
+  { name: '波波', emoji: '🐰', spot: 'garden', msg: '花園裡有草莓單字糖耶 🍓', giftAmount: 6 },
+  { name: '小金', emoji: '🦊', spot: 'deck', msg: '聽說多複習錯題能獲得三倍快樂 🌟', giftAmount: 15 },
+  { name: '胖胖', emoji: '🐼', spot: 'tatami', msg: '肚子飽飽的，最適合睡午覺了 🥯', giftAmount: 10 }
+];
+
 export const PetRoom: React.FC<PetRoomProps> = ({
   pet,
   stats,
@@ -76,6 +95,43 @@ export const PetRoom: React.FC<PetRoomProps> = ({
 
   // Simulated Chat feed state
   const [chatFeed, setChatFeed] = useState<{ id: number; sender: string; msg: string }[]>([]);
+
+  // Visitor states
+  const [visitors, setVisitors] = useState<Visitor[]>([]);
+
+  // Spawn random visitors when pet is loaded
+  useEffect(() => {
+    if (pet) {
+      const count = Math.random() > 0.5 ? 2 : 1;
+      const shuffled = [...VISITOR_TEMPLATES].sort(() => 0.5 - Math.random());
+      const selected = shuffled.slice(0, count).map((v, i) => ({
+        ...v,
+        id: `visitor_${Date.now()}_${i}`,
+        giftClaimed: false,
+        dialogueVisible: false
+      }));
+      setVisitors(selected);
+    }
+  }, [pet ? pet.name : null]);
+
+  const handleVisitorClick = (id: string) => {
+    setVisitors(prev => prev.map(v => {
+      if (v.id === id) {
+        if (!v.giftClaimed) {
+          playSfx('correct');
+          onUpdateStats(prevStats => ({
+            ...prevStats,
+            coins: prevStats.coins + v.giftAmount,
+            petDiary: [`${new Date().toLocaleDateString()}: 訪客 ${v.name} 來訪並留下了 ${v.giftAmount} 金幣！🎁`, ...(prevStats.petDiary || [])]
+          }));
+          alert(`🎁 訪客 ${v.name} 留下了 ${v.giftAmount} 金幣禮物！已存入您的錢包。`);
+          return { ...v, giftClaimed: true, dialogueVisible: true };
+        }
+        return { ...v, dialogueVisible: !v.dialogueVisible };
+      }
+      return v;
+    }));
+  };
 
   // Shop Items definition
   const shopItems: ShopItem[] = [
@@ -650,150 +706,284 @@ export const PetRoom: React.FC<PetRoomProps> = ({
         
         {/* Left Column: Pet Room & Custom wallpaper (8 cols) */}
         <div className="lg:col-span-8 flex flex-col gap-6">
-          <div 
-            className="game-card border-pink-100 flex flex-col items-center justify-center py-12 relative overflow-hidden select-none"
-            style={{
-              background: 'radial-gradient(circle, rgba(255,245,247,1) 0%, rgba(240,244,248,1) 100%)'
-            }}
-          >
-            {/* Interactive petting hint */}
-            <div className="absolute top-4 right-4 text-xs font-bold text-slate-400 bg-white/80 border border-slate-100 px-3 py-1 rounded-full flex items-center gap-1.5">
-              <Heart className="w-3.5 h-3.5 text-pink-400 fill-pink-400" />
-              點擊寵物可以觸摸互動！
-            </div>
+          {/* Scrollable Indicator for Mobile */}
+          <div className="block md:hidden text-center text-xs text-slate-400 font-bold mb-2">
+            ⬅️ 左右滑動查看小屋與訪客 ➡️
+          </div>
 
-            {/* Render equipped furniture items row visually at the bottom */}
-            <div className="absolute bottom-4 left-6 flex gap-3 text-4xl bg-white/40 px-4 py-2 rounded-2xl border border-white/60 pointer-events-none">
-              <span className="text-xs font-bold text-slate-400 self-center mr-1">家具：</span>
-              {(stats.equippedFurniture || []).length === 0 ? (
-                <span className="text-xs text-slate-400 italic font-bold">空空如也 📦</span>
-              ) : (
-                stats.equippedFurniture?.map((furn) => (
-                  <span key={furn} className="filter drop-shadow-sm animate-floating">{furn}</span>
-                ))
-              )}
-            </div>
+          <div className="neko-room-container">
+            <div className="neko-room">
+              {/* Garden Grid */}
+              <div className="neko-garden-grid" />
 
-            {/* Pet Sprite Box */}
-            <div
-              onClick={handlePetInteraction}
-              className="w-64 h-64 flex items-center justify-center mb-6 relative cursor-pointer active:scale-95 transition-transform"
-            >
-              <img
-                src={getPetImage()}
-                alt="Pet Sprite"
-                className={`w-52 h-52 object-contain transition-all duration-100 ${
-                  pet.isSick
-                    ? 'animate-pet-sad filter saturate-50'
-                    : petActionState === 'idle'
-                    ? 'animate-pet-idle'
-                    : petActionState === 'jump'
-                    ? 'animate-pet-jump'
-                    : petActionState === 'evolve'
-                    ? 'animate-pet-evolve'
-                    : 'animate-pet-sad'
-                }`}
-              />
-
-              {/* Floating accessories */}
-              <div className="absolute -top-4 right-6 text-4xl animate-floating flex gap-1 pointer-events-none">
-                {stats.equippedAccessories?.map((acc) => (
-                  <span key={acc} className="filter drop-shadow">{acc}</span>
-                ))}
+              {/* Shoji screen */}
+              <div className="neko-shoji">
+                <div className="neko-shoji-line" />
+                <div className="neko-shoji-line" />
+                <div className="neko-shoji-line" />
+                <div className="neko-shoji-line" />
+                <div className="neko-shoji-vertical" />
               </div>
 
-              {/* Floating hearts petting */}
-              {pettingHearts.map((heart) => (
-                <div
-                  key={heart.id}
-                  className="absolute pointer-events-none text-2xl"
-                  style={{
-                    left: heart.x,
-                    top: heart.y - 45,
-                    animation: 'float-number-up 0.8s ease-out forwards'
-                  }}
+              {/* Elevated Platforms */}
+              <div className="neko-platform-tatami" />
+              <div className="neko-platform-wood" />
+
+              {/* Neko Atsume Circular Sidebar */}
+              <div className="neko-sidebar">
+                <button
+                  onClick={() => { playSfx('click'); onNavigate('adventure'); }}
+                  className="neko-sidebar-btn neko-sidebar-btn-secondary"
+                  title="單字冒險"
                 >
-                  💖
-                </div>
-              ))}
-            </div>
-
-            {/* Name & Title */}
-            <h3 className="text-3xl font-extrabold text-slate-700 mb-1 flex items-center gap-2">
-              {pet.name}
-              {pet.isSick ? (
-                <span className="text-xs font-bold bg-red-400 text-white px-2.5 py-0.5 rounded-full">
-                  生病中
-                </span>
-              ) : pet.level >= 10 ? (
-                <span className="text-xs font-bold bg-amber-400 text-white px-2 py-0.5 rounded-full flex items-center gap-0.5">
-                  <Star className="w-3 h-3 fill-current" /> 終極體
-                </span>
-              ) : pet.level >= 5 ? (
-                <span className="text-xs font-bold bg-purple-400 text-white px-2 py-0.5 rounded-full">
-                  青年體
-                </span>
-              ) : (
-                <span className="text-xs font-bold bg-blue-400 text-white px-2 py-0.5 rounded-full">
-                  幼年體
-                </span>
-              )}
-            </h3>
-
-            {/* Level and Exp bar */}
-            <div className="flex flex-col items-center w-full max-w-sm px-6 mb-6">
-              <div className="flex justify-between w-full text-xs font-bold text-slate-500 mb-1">
-                <span>Lv. {pet.level}</span>
-                <span>EXP: {pet.exp} / {pet.maxExp}</span>
+                  <span className="neko-sidebar-btn-icon">⚔️</span>
+                  <span className="neko-sidebar-btn-label">冒險</span>
+                </button>
+                <button
+                  onClick={() => { playSfx('click'); onNavigate('mistakes'); }}
+                  className="neko-sidebar-btn neko-sidebar-btn-blue"
+                  title="錯題本"
+                >
+                  <span className="neko-sidebar-btn-icon">📖</span>
+                  <span className="neko-sidebar-btn-label">錯題</span>
+                </button>
+                <button
+                  onClick={() => { playSfx('click'); onNavigate('analytics'); }}
+                  className="neko-sidebar-btn neko-sidebar-btn-accent"
+                  title="學習統計"
+                >
+                  <span className="neko-sidebar-btn-icon">📊</span>
+                  <span className="neko-sidebar-btn-label">統計</span>
+                </button>
+                <button
+                  onClick={() => { playSfx('click'); setShowSignInModal(true); }}
+                  className="neko-sidebar-btn neko-sidebar-btn-primary"
+                  title="每日簽到"
+                >
+                  <span className="neko-sidebar-btn-icon">📅</span>
+                  <span className="neko-sidebar-btn-label">簽到</span>
+                </button>
               </div>
-              <div className="w-full h-3.5 bg-slate-200 rounded-full overflow-hidden border border-slate-100">
+
+              {/* Coins Display Sign (Bottom Left) */}
+              <div className="neko-wallet">
+                <span className="neko-sidebar-btn-icon">🪙</span>
+                <span className="neko-wallet-label">金幣</span>
+                <span className="neko-wallet-amount">{stats.coins}</span>
+              </div>
+
+              {/* Floating Status Panel (Top Right - Wooden Board design) */}
+              <div className="absolute top-4 right-4 bg-white/95 border-4 border-[#cbd5e1] p-3.5 rounded-2xl shadow-md z-10 w-[240px] text-xs">
+                <div className="flex justify-between items-center mb-1.5">
+                  <h4 className="font-extrabold text-slate-700 text-sm flex items-center gap-1.5">
+                    🐾 {pet.name}
+                  </h4>
+                  <span className="text-[10px] font-extrabold bg-pink-100 text-pink-600 px-2 py-0.5 rounded-full">
+                    Lv. {pet.level}
+                  </span>
+                </div>
+
+                {/* Level Progress */}
+                <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden border border-slate-200 mb-2.5">
+                  <div
+                    className="h-full bg-pink-400 rounded-full transition-all duration-300"
+                    style={{ width: `${(pet.exp / pet.maxExp) * 100}%` }}
+                  />
+                </div>
+
+                {/* Satiety and Affection */}
+                <div className="flex flex-col gap-1.5">
+                  <div className="flex justify-between items-center text-[10px] font-bold text-slate-500">
+                    <span>🥐 飽食度: {pet.satiety}%</span>
+                    <span>{pet.satiety < 30 ? '飢餓 😭' : '飽滿 🥰'}</span>
+                  </div>
+                  <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                    <div
+                      className={`h-full rounded-full ${pet.satiety < 30 ? 'bg-pink-400 animate-pulse' : 'bg-emerald-400'}`}
+                      style={{ width: `${pet.satiety}%` }}
+                    />
+                  </div>
+
+                  <div className="flex justify-between items-center text-[10px] font-bold text-slate-500 mt-1">
+                    <span>💖 好感度: {pet.affection}%</span>
+                    <span>{pet.affection < 40 ? '冷淡 😥' : '親密 💖'}</span>
+                  </div>
+                  <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-pink-400"
+                      style={{ width: `${pet.affection}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Pet Hotspot (Wooden Platform) */}
+              <div 
+                className="neko-hotspot text-center" 
+                style={{ top: '65%', left: '32%' }}
+              >
+                {/* Pet Dialogue/Action bubble */}
+                {pet.isSick ? (
+                  <div className="neko-dialogue">🤢 生病不舒服...</div>
+                ) : petActionState === 'jump' ? (
+                  <div className="neko-dialogue">開心跳躍！💖</div>
+                ) : petActionState === 'evolve' ? (
+                  <div className="neko-dialogue">進化中...✨</div>
+                ) : (
+                  <div className="neko-dialogue">點我互動 🐾</div>
+                )}
+
+                {/* Pet Sprite Clickable Area */}
                 <div
-                  className="h-full bg-pink-400 rounded-full transition-all duration-300"
-                  style={{ width: `${(pet.exp / pet.maxExp) * 100}%` }}
-                />
-              </div>
-            </div>
-
-            {/* Status Gauges */}
-            <div className="grid grid-cols-2 gap-4 w-full max-w-md px-4">
-              <div className="bg-white/80 border border-slate-100 rounded-2xl p-3 flex flex-col">
-                <span className="text-xs font-bold text-slate-400 flex items-center gap-1 mb-1">
-                  🥐 飽食度
-                </span>
-                <div className="flex justify-between items-center">
-                  <span className="text-lg font-extrabold text-slate-600">{pet.satiety}%</span>
-                  <span className="text-xs text-slate-400">
-                    {pet.satiety < 30 ? '餓肚子啦😭' : '飽飽的🥰'}
-                  </span>
-                </div>
-                <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden mt-1.5">
-                  <div
-                    className={`h-full rounded-full transition-all duration-300 ${
-                      pet.satiety < 30 ? 'bg-pink-400 animate-pulse' : 'bg-secondary'
+                  onClick={handlePetInteraction}
+                  className="w-48 h-48 flex items-center justify-center relative cursor-pointer active:scale-95 transition-transform neko-hotspot-item"
+                >
+                  <img
+                    src={getPetImage()}
+                    alt="Pet Sprite"
+                    className={`w-36 h-36 object-contain transition-all duration-100 ${
+                      pet.isSick
+                        ? 'animate-pet-sad filter saturate-50'
+                        : petActionState === 'idle'
+                        ? 'animate-pet-idle'
+                        : petActionState === 'jump'
+                        ? 'animate-pet-jump'
+                        : petActionState === 'evolve'
+                        ? 'animate-pet-evolve'
+                        : 'animate-pet-sad'
                     }`}
-                    style={{ width: `${pet.satiety}%` }}
                   />
+
+                  {/* Floating accessories */}
+                  <div className="absolute -top-2 right-4 text-3xl animate-floating flex gap-0.5 pointer-events-none">
+                    {stats.equippedAccessories?.map((acc) => (
+                      <span key={acc} className="filter drop-shadow">{acc}</span>
+                    ))}
+                  </div>
+
+                  {/* Floating petting hearts */}
+                  {pettingHearts.map((heart) => (
+                    <div
+                      key={heart.id}
+                      className="absolute pointer-events-none text-2xl"
+                      style={{
+                        left: heart.x,
+                        top: heart.y - 45,
+                        animation: 'float-number-up 0.8s ease-out forwards'
+                      }}
+                    >
+                      💖
+                    </div>
+                  ))}
                 </div>
               </div>
 
-              <div className="bg-white/80 border border-slate-100 rounded-2xl p-3 flex flex-col">
-                <span className="text-xs font-bold text-slate-400 flex items-center gap-1 mb-1">
-                  <Heart className="w-3.5 h-3.5 text-pink-400 fill-pink-400" />
-                  好感度
-                </span>
-                <div className="flex justify-between items-center">
-                  <span className="text-lg font-extrabold text-slate-600">{pet.affection}%</span>
-                  <span className="text-xs text-slate-400">
-                    {pet.affection < 40 ? '冷淡中😥' : '親密💖'}
-                  </span>
-                </div>
-                <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden mt-1.5">
+              {/* Render Furniture Items on Hotspots */}
+              {/* Spot 1: Tatami Spot (Top-Right) */}
+              {(stats.equippedFurniture || []).map((furn, idx) => {
+                // If it's a bed or book desk, place it on Tatami
+                if (furn.includes('🛏️') || (idx === 0 && !(stats.equippedFurniture || []).some(f => f.includes('🛏️')))) {
+                  return (
+                    <div 
+                      key={furn}
+                      className="neko-hotspot text-center neko-hotspot-item" 
+                      style={{ top: '42%', left: '72%' }}
+                      title="已擺設的家具"
+                    >
+                      <span className="text-6xl filter drop-shadow animate-floating">{furn}</span>
+                      <span className="text-[10px] font-extrabold bg-[#cbd5e1] text-slate-600 px-2 py-0.5 rounded-full mt-1.5">
+                        室內家具
+                      </span>
+                    </div>
+                  );
+                }
+                return null;
+              })}
+
+              {/* Spot 2: Deck Spot (Bottom-Left platform) */}
+              {(stats.equippedFurniture || []).map((furn, idx) => {
+                if (furn.includes('📚') || furn.includes('🧸') || (idx === 1 && !(stats.equippedFurniture || []).some(f => f.includes('📚') || f.includes('🧸')))) {
+                  return (
+                    <div 
+                      key={furn}
+                      className="neko-hotspot text-center neko-hotspot-item" 
+                      style={{ top: '75%', left: '55%' }}
+                      title="已擺設的家具"
+                    >
+                      <span className="text-6xl filter drop-shadow animate-floating">{furn}</span>
+                      <span className="text-[10px] font-extrabold bg-[#cbd5e1] text-slate-600 px-2 py-0.5 rounded-full mt-1.5">
+                        地板裝飾
+                      </span>
+                    </div>
+                  );
+                }
+                return null;
+              })}
+
+              {/* Spot 3: Garden Spot (Bottom-Right corner) */}
+              {(stats.equippedFurniture || []).map((furn, idx) => {
+                if (furn.includes('🪴') || idx === 2) {
+                  return (
+                    <div 
+                      key={furn}
+                      className="neko-hotspot text-center neko-hotspot-item" 
+                      style={{ top: '70%', left: '85%' }}
+                      title="已擺設的家具"
+                    >
+                      <span className="text-6xl filter drop-shadow animate-floating">{furn}</span>
+                      <span className="text-[10px] font-extrabold bg-[#cbd5e1] text-slate-600 px-2 py-0.5 rounded-full mt-1.5">
+                        庭院植物
+                      </span>
+                    </div>
+                  );
+                }
+                return null;
+              })}
+
+              {/* Spawn Visiting NPC Pets */}
+              {visitors.map((visitor) => {
+                // Determine coordinates based on spot
+                let topCoord = '72%';
+                let leftCoord = '82%';
+                if (visitor.spot === 'tatami') {
+                  topCoord = '46%';
+                  leftCoord = '62%';
+                } else if (visitor.spot === 'deck') {
+                  topCoord = '68%';
+                  leftCoord = '46%';
+                }
+
+                return (
                   <div
-                    className="h-full rounded-full bg-pink-400 transition-all duration-300"
-                    style={{ width: `${pet.affection}%` }}
-                  />
-                </div>
-              </div>
+                    key={visitor.id}
+                    className="neko-hotspot cursor-pointer neko-hotspot-item"
+                    style={{ top: topCoord, left: leftCoord }}
+                    onClick={() => handleVisitorClick(visitor.id)}
+                  >
+                    {/* Visitor Dialogue */}
+                    {visitor.dialogueVisible && (
+                      <div className="neko-dialogue bg-amber-50 border-amber-300">
+                        {visitor.msg}
+                      </div>
+                    )}
+
+                    {/* NPC animal body */}
+                    <div className="text-5xl filter drop-shadow relative">
+                      {visitor.emoji}
+                      {/* Red envelope Gift icon if gift not claimed yet */}
+                      {!visitor.giftClaimed && (
+                        <span className="absolute -top-2 -right-2 text-base animate-bounce">
+                          🎁
+                        </span>
+                      )}
+                    </div>
+                    
+                    <span className="text-[9px] font-extrabold bg-amber-400 text-amber-900 px-1.5 py-0.5 rounded-full mt-1">
+                      訪客: {visitor.name}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
