@@ -1,0 +1,426 @@
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=Outfit:wght@100..900&display=swap');
+
+:root {
+  --font-game: 'Fredoka', 'Outfit', system-ui, -apple-system, sans-serif;
+  
+  /* Color Palette - Soft Pastel & High Premium Styling */
+  --color-bg-base: #f3f6fa;
+  --color-bg-card: rgba(255, 255, 255, 0.85);
+  
+  --color-primary: #ff8fa3;       /* Pastel Pink */
+  --color-primary-dark: #ff5c7c;
+  --color-primary-light: #ffe3e8;
+  
+  --color-secondary: #74dec4;     /* Pastel Mint Green */
+  --color-secondary-dark: #3ec4a3;
+  --color-secondary-light: #d8f7ee;
+  
+  --color-accent: #ffd166;        /* Pastel Yellow */
+  --color-accent-dark: #ffb703;
+  --color-accent-light: #fff5d9;
+  
+  --color-blue: #a2d2ff;          /* Pastel Baby Blue */
+  --color-blue-dark: #70b7ff;
+  --color-blue-light: #e8f4ff;
+  
+  --color-purple: #c8b6ff;        /* Pastel Lavender */
+  --color-purple-dark: #b197fc;
+  --color-purple-light: #f1ecff;
+  
+  --color-text-main: #2d3b4e;     /* Charcoal Soft Slate */
+  --color-text-muted: #6e8296;
+  --color-border: #e9eff5;
+  
+  /* Bouncy Button Shadows */
+  --shadow-btn-primary: 0 6px 0 #e6627c;
+  --shadow-btn-secondary: 0 6px 0 #2ca181;
+  --shadow-btn-blue: 0 6px 0 #58a1eb;
+  --shadow-btn-accent: 0 6px 0 #e69d00;
+  --shadow-btn-gray: 0 6px 0 #cbd5e1;
+}
+
+/* Reset and Globals */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-game);
+  background: 
+    radial-gradient(circle at 10% 20%, rgba(255, 240, 243, 0.7) 0%, transparent 45%),
+    radial-gradient(circle at 90% 80%, rgba(232, 243, 255, 0.7) 0%, transparent 45%),
+    radial-gradient(circle at 50% 50%, rgba(241, 236, 255, 0.5) 0%, transparent 50%),
+    #f4f7fa;
+  color: var(--color-text-main);
+  line-height: 1.5;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+button, input, select {
+  font-family: var(--font-game);
+}
+
+/* Keyframes & Micro-animations */
+@keyframes pet-idle {
+  0%, 100% {
+    transform: translateY(0) scaleY(1) scaleX(1);
+  }
+  50% {
+    transform: translateY(-10px) scaleY(0.95) scaleX(1.03);
+  }
+}
+
+@keyframes pet-jump {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  40% {
+    transform: translateY(-45px) scaleX(0.85) scaleY(1.15);
+  }
+  50% {
+    transform: translateY(-45px) rotate(15deg) scale(1.1);
+  }
+  60% {
+    transform: translateY(-45px) rotate(-15deg) scale(1.1);
+  }
+  85% {
+    transform: translateY(5px) scaleX(1.15) scaleY(0.85);
+  }
+}
+
+@keyframes pet-sad {
+  0%, 100% {
+    transform: translate(0, 0);
+  }
+  20%, 60% {
+    transform: translate(-6px, 6px) rotate(-6deg);
+  }
+  40%, 80% {
+    transform: translate(6px, 6px) rotate(6deg);
+  }
+}
+
+@keyframes pet-evolve {
+  0% {
+    transform: scale(1);
+    filter: brightness(1) drop-shadow(0 0 0 rgba(255,209,102,0));
+  }
+  50% {
+    transform: scale(1.35) rotate(360deg);
+    filter: brightness(1.8) drop-shadow(0 0 30px rgba(255,209,102,1));
+  }
+  100% {
+    transform: scale(1);
+    filter: brightness(1) drop-shadow(0 0 0 rgba(255,209,102,0));
+  }
+}
+
+@keyframes floating {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes pop-in {
+  0% {
+    transform: scale(0.85);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-10px); }
+  75% { transform: translateX(10px); }
+}
+
+@keyframes float-number-up {
+  0% {
+    transform: translateY(0) scale(0.6);
+    opacity: 0;
+  }
+  25% {
+    transform: translateY(-20px) scale(1.3);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-90px) scale(0.9);
+    opacity: 0;
+  }
+}
+
+@keyframes gacha-shake {
+  0%, 100% { transform: rotate(0) scale(1); }
+  10%, 30%, 50%, 70%, 90% { transform: rotate(-10deg) scale(1.08); }
+  20%, 40%, 60%, 80% { transform: rotate(10deg) scale(1.08); }
+}
+
+@keyframes neon-glow {
+  0%, 100% { box-shadow: 0 0 15px rgba(255,143,163,0.3), inset 0 0 10px rgba(255,143,163,0.2); }
+  50% { box-shadow: 0 0 30px rgba(255,143,163,0.9), inset 0 0 20px rgba(255,143,163,0.5); }
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.95); opacity: 0.6; }
+  50% { transform: scale(1.1); opacity: 0.9; }
+  100% { transform: scale(0.95); opacity: 0.6; }
+}
+
+/* Global Game Styles */
+.animate-pet-idle {
+  animation: pet-idle 2.8s ease-in-out infinite;
+}
+
+.animate-pet-jump {
+  animation: pet-jump 0.9s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+}
+
+.animate-pet-sad {
+  animation: pet-sad 0.6s ease-in-out forwards;
+}
+
+.animate-pet-evolve {
+  animation: pet-evolve 1.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.animate-floating {
+  animation: floating 3.2s ease-in-out infinite;
+}
+
+.animate-pop-in {
+  animation: pop-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.animate-shake {
+  animation: shake 0.4s ease-in-out;
+}
+
+.animate-gacha-shake {
+  animation: gacha-shake 1.1s cubic-bezier(0.36, 0.07, 0.19, 0.97) infinite;
+}
+
+.gacha-rare-glow {
+  animation: neon-glow 1.5s ease-in-out infinite;
+  border-color: var(--color-primary) !important;
+}
+
+/* Floating damage numbers styles */
+.float-damage-text {
+  position: absolute;
+  font-weight: 900;
+  font-size: 2.5rem;
+  color: #ff477e;
+  text-shadow: 
+    0 4px 0 #ffffff, 0 -4px 0 #ffffff, 
+    4px 0 0 #ffffff, -4px 0 0 #ffffff, 
+    3px 3px 0 #ffffff, -3px -3px 0 #ffffff, 
+    0 10px 15px rgba(0,0,0,0.18);
+  pointer-events: none;
+  z-index: 100;
+  animation: float-number-up 1.3s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
+  font-family: var(--font-game);
+}
+
+.float-reward-text {
+  position: absolute;
+  font-weight: 900;
+  font-size: 2rem;
+  color: #ffb703;
+  text-shadow: 
+    0 4px 0 #ffffff, 0 -4px 0 #ffffff, 
+    4px 0 0 #ffffff, -4px 0 0 #ffffff, 
+    0 8px 12px rgba(0,0,0,0.15);
+  pointer-events: none;
+  z-index: 100;
+  animation: float-number-up 1.3s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
+  font-family: var(--font-game);
+}
+
+/* Custom Styled Cards (Candy Glassmorphism) */
+.game-card {
+  background-color: var(--color-bg-card);
+  backdrop-filter: blur(16px);
+  border: 4px solid #ffffff;
+  border-radius: 32px;
+  padding: 26px;
+  box-shadow: 
+    0 8px 30px rgba(163, 177, 198, 0.15), 
+    inset 0 4px 0 rgba(255, 255, 255, 0.6),
+    inset 0 -4px 0 rgba(0, 0, 0, 0.02);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.game-card-interactive {
+  cursor: pointer;
+}
+.game-card-interactive:hover {
+  transform: translateY(-6px) scale(1.01);
+  box-shadow: 0 20px 40px rgba(163, 177, 198, 0.3);
+  border-color: var(--color-primary-light);
+}
+
+/* Cute Bubble Buttons (Chubby Candy Feel) */
+.btn-bubble {
+  cursor: pointer;
+  border: none;
+  font-weight: 800;
+  border-radius: 20px;
+  padding: 14px 28px;
+  font-size: 1.1rem;
+  transition: all 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  user-select: none;
+  text-decoration: none;
+  outline: none;
+  position: relative;
+}
+
+.btn-bubble:hover {
+  transform: translateY(-2px);
+}
+
+.btn-bubble:active {
+  transform: translateY(4px);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #ff8fa3 0%, #ff6b8b 100%);
+  color: white;
+  box-shadow: var(--shadow-btn-primary), 0 10px 15px rgba(255, 143, 163, 0.3);
+}
+.btn-primary:hover {
+  background: linear-gradient(135deg, #ff7a92 0%, #ff5277 100%);
+}
+.btn-primary:active {
+  box-shadow: 0 2px 0 #e6627c;
+}
+
+.btn-secondary {
+  background: linear-gradient(135deg, #74dec4 0%, #4ecfb0 100%);
+  color: #0b503d;
+  box-shadow: var(--shadow-btn-secondary), 0 10px 15px rgba(116, 222, 196, 0.3);
+}
+.btn-secondary:hover {
+  background: linear-gradient(135deg, #5ecdb1 0%, #3bbd9d 100%);
+}
+.btn-secondary:active {
+  box-shadow: 0 2px 0 #2ca181;
+}
+
+.btn-blue {
+  background: linear-gradient(135deg, #a2d2ff 0%, #83c0fc 100%);
+  color: #1a4674;
+  box-shadow: var(--shadow-btn-blue), 0 10px 15px rgba(162, 210, 255, 0.3);
+}
+.btn-blue:hover {
+  background: linear-gradient(135deg, #8bc2f8 0%, #6ab0fa 100%);
+}
+.btn-blue:active {
+  box-shadow: 0 2px 0 #58a1eb;
+}
+
+.btn-accent {
+  background: linear-gradient(135deg, #ffd166 0%, #ffc033 100%);
+  color: #7a5100;
+  box-shadow: var(--shadow-btn-accent), 0 10px 15px rgba(255, 209, 102, 0.3);
+}
+.btn-accent:hover {
+  background: linear-gradient(135deg, #ffc547 0%, #ffa800 100%);
+}
+.btn-accent:active {
+  box-shadow: 0 2px 0 #e69d00;
+}
+
+.btn-gray {
+  background: #e2e8f0;
+  color: #475569;
+  box-shadow: var(--shadow-btn-gray);
+}
+.btn-gray:hover {
+  background: #cbd5e1;
+}
+.btn-gray:active {
+  box-shadow: 0 2px 0 #cbd5e1;
+}
+
+.btn-bubble:disabled {
+  background: #cbd5e1 !important;
+  color: #94a3b8 !important;
+  box-shadow: 0 4px 0 #cbd5e1 !important;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* Beautiful custom progress bars */
+.progress-bar-glow {
+  box-shadow: 0 0 8px rgba(255, 143, 163, 0.3);
+}
+
+/* Navigation Header styling */
+header {
+  box-shadow: 0 4px 25px rgba(163, 177, 198, 0.1);
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(12px);
+}
+
+/* Audio Pronunciation Button Pulse Effect */
+.audio-pulse-btn {
+  position: relative;
+  z-index: 1;
+}
+.audio-pulse-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  border: 3px solid var(--color-purple);
+  opacity: 0;
+  z-index: -1;
+  animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 99px;
+  border: 2px solid var(--color-bg-base);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Form input styling */
+input[type="text"] {
+  border: 4px solid var(--color-border);
+  border-radius: 22px;
+  outline: none;
+  font-size: 1.2rem;
+  transition: all 0.25s ease-in-out;
+  background-color: rgba(255,255,255,0.9);
+}
+input[type="text"]:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 12px rgba(255, 143, 163, 0.2);
+}
